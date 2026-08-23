@@ -1,5 +1,5 @@
 ---
-"mattpocock-skills": patch
+"tzurae-matt-skills": patch
 ---
 
 Require every `to-tickets` issue to read as a self-contained causal chain for a fresh session.
