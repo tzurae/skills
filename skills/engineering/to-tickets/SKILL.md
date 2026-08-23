@@ -35,13 +35,59 @@ Break the work into **tracer bullet** tickets.
 
 </vertical-slice-rules>
 
+<ticket-narrative-contract>
+
+Every ticket must stand alone for a fresh session with no conversation history. Write it as a **causal chain**, not a feature list.
+
+### Why
+
+Start with the user's real situation. Define domain terms the reader needs, give at least one concrete example, describe the observed pain and its consequence, and cite the evidence that makes the problem credible. Keep solutions out of this section. A test failure or code smell is supporting evidence, not the user's reason to care.
+
+### What
+
+Give an ordered solution path that removes the pain described in Why. For every step, state:
+
+1. which specific pain or cause from Why it addresses;
+2. what observable behaviour changes for the user;
+3. what observation would prove that the step worked.
+
+What is the reasoning that connects the problem to the solution. It is not a list of features, modules, or acceptance criteria.
+
+### How
+
+Move from big picture to detail. Begin with the end-to-end data or control flow, then narrow into module responsibilities, interfaces, state transitions, edge cases, and tests. Every implementation detail must name the What step it enables. Omit details that do not support the solution path.
+
+### Success metrics
+
+Every ticket carries falsifiable success metrics at the levels the slice needs:
+
+- **User outcome**: the demo or real workflow that becomes successful.
+- **Behaviour contract**: deterministic examples and edge cases that were false at the starting commit.
+- **Regression gate**: tests, builds, migrations, or smoke checks that protect existing behaviour.
+
+Use evidence-derived thresholds. Never invent a number merely to make a metric look precise. Every metric must be owned by this ticket and capable of failing before the work begins.
+
+### Linkage and reader tests
+
+Before presenting a ticket, check:
+
+- Every pain in Why is removed by a named step in What.
+- Every What step is enabled by a named part of How.
+- Every success metric proves a What step or protects an explicit regression risk.
+- Removing any What step leaves a stated Why pain unresolved.
+- A reader with no domain knowledge and no conversation history can explain the current problem, the solution path, why each step should work, how it will be built, and how success will be judged.
+
+</ticket-narrative-contract>
+
 Give each ticket its **blocking edges**: the other tickets that must complete before it can start. A ticket with no blockers can start immediately.
 
 **Wide refactors are the exception to vertical slicing.** A **wide refactor** is one mechanical change (rename a column, retype a shared symbol) whose **blast radius** fans across the whole codebase, so a single edit breaks thousands of call sites at once and no vertical slice can land green. Don't force it into a tracer bullet; sequence it as **expand–contract**. First expand: add the new form beside the old so nothing breaks. Then migrate the call sites over in batches sized by blast radius (per package, per directory), each batch its own ticket blocked by the expand, keeping CI green batch to batch because the old form still exists. Finally contract: delete the old form once no caller remains, in a ticket blocked by every migrate batch. When even the batches can't stay green alone, keep the sequence but let them share an integration branch that all block a final integrate-and-verify ticket; green is promised only there.
 
 ### 4. Quiz the user
 
-Present the proposed breakdown as a numbered list. For each ticket, show:
+Review the draft in two passes.
+
+First, present the proposed breakdown as a numbered list. For each ticket, show:
 
 - **Title**: short descriptive name
 - **Blocked by**: which other tickets (if any) must complete first
@@ -53,7 +99,9 @@ Ask the user:
 - Are the blocking edges correct: does each ticket only depend on tickets that genuinely gate it?
 - Should any tickets be merged or split further?
 
-Iterate until the user approves the breakdown.
+Once the breakdown is right, review the complete ticket bodies one at a time unless the user explicitly requests a batch. For each ticket, confirm that its Why, What, How, examples, causal links, and success metrics are understandable and complete. Never dump several full ticket bodies into one response.
+
+Iterate until the user approves both the breakdown and every complete ticket body.
 
 ### 5. Publish the tickets to the configured tracker
 
@@ -70,14 +118,29 @@ Do NOT close or modify any parent issue.
 
 # <NN>: <Ticket title>
 
-**What to build:** the end-to-end behaviour this ticket makes work, from the user's perspective, not a layer-by-layer implementation list.
+## Why
 
-**Blocked by:** the numbers/titles of the tickets that gate this one, or "None (can start immediately)".
+The user's situation, a concrete example, the observed pain and consequence, and supporting evidence.
+
+## What
+
+The ordered solution steps. Each step names the Why pain it removes, the user-visible change, and the observation that proves it worked.
+
+## How
+
+The implementation story from end-to-end flow through module responsibilities, interfaces, state transitions, edge cases, and tests. Each detail maps to a What step.
+
+## Success metrics
+
+- [ ] User-outcome metric
+- [ ] Behaviour-contract metric that is false at the starting commit
+- [ ] Regression gate
+
+## Blocked by
+
+The numbers/titles of the tickets that gate this one, or "None (can start immediately)".
 
 **Status:** ready-for-agent
-
-- [ ] Acceptance criterion 1
-- [ ] Acceptance criterion 2
 
 </local-ticket-template>
 
@@ -87,14 +150,23 @@ Do NOT close or modify any parent issue.
 
 A reference to the parent issue on the tracker (if the source was an existing issue, otherwise omit this section).
 
-## What to build
+## Why
 
-The end-to-end behaviour this ticket makes work, from the user's perspective, not layer-by-layer implementation.
+The user's situation, a concrete example, the observed pain and consequence, and supporting evidence.
 
-## Acceptance criteria
+## What
 
-- [ ] Criterion 1
-- [ ] Criterion 2
+The ordered solution steps. Each step names the Why pain it removes, the user-visible change, and the observation that proves it worked.
+
+## How
+
+The implementation story from end-to-end flow through module responsibilities, interfaces, state transitions, edge cases, and tests. Each detail maps to a What step.
+
+## Success metrics
+
+- [ ] User-outcome metric
+- [ ] Behaviour-contract metric that is false at the starting commit
+- [ ] Regression gate
 
 ## Blocked by
 

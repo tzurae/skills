@@ -4,6 +4,8 @@
 
 Every ticket is a **tracer bullet**: a narrow but complete path through every layer of the change (schema, API, UI, tests) that can be demoed on its own the moment it lands. That is the constraint that makes it behave differently from the obvious way to split work, which is to cut one layer at a time and integrate at the end. It also sizes each ticket to fit in a single fresh [context window](https://www.aihero.dev/ai-coding-dictionary/context-window), because the thing that will pick the ticket up is a [session](https://www.aihero.dev/ai-coding-dictionary/session) that has never seen your spec.
 
+A ticket is also a causal argument that survives the conversation which produced it. Its Why establishes the user's pain with a concrete example and evidence. Its What gives the ordered solution path, with each step naming the pain it removes and the observation that proves it worked. Its How moves from the end-to-end flow into implementation details that enable those steps. Falsifiable success metrics close the argument.
+
 ## When to reach for it
 
 You invoke this by typing `/to-tickets`. The [agent](https://www.aihero.dev/ai-coding-dictionary/agent) won't reach for it on its own.
@@ -29,6 +31,17 @@ A **horizontal** slice ships one layer of the change. Nothing works until every 
 This is the rule people break most often, and the consequences are well documented. One team ran a 26-ticket stack sliced by layer (corpus, producer, aggregator, selector) and got roughly twenty agent runs per closed ticket, about three quarters of them rework. Their own post-mortem traced every failure class back to the horizontal slicing rather than to the implementations.
 
 Two things happen before anything is published. `to-tickets` looks for prefactoring (the principle "make the change easy, then make the easy change") and orders that work first. Then it presents the breakdown as a numbered list and quizzes you on it: is the granularity right, are the blocking edges real, should anything merge or split. Nothing reaches the tracker until you approve, and that quiz is the place to push back.
+
+## Tickets as causal chains
+
+A tracer bullet can still be unreadable when its body is only a feature list. A fresh session needs enough context to reconstruct the reasoning, not merely the requested output.
+
+- **Why** begins in the user's real situation, defines necessary domain language, gives a concrete example, and explains the consequence. Tests and code evidence support the pain instead of replacing it.
+- **What** is the ordered reasoning from pain to solution. Every step names which Why pain it removes, what changes for the user, and what observation would prove the step effective.
+- **How** starts with the system flow, then narrows into module responsibilities, interfaces, state transitions, edge cases, and tests. Every detail supports a named What step.
+- **Success metrics** are falsifiable at the starting commit and owned by the ticket. They cover the user outcome, the behaviour contract, and the regression risks relevant to that slice.
+
+The reader test is strict: someone with no conversation history and no prior domain knowledge can explain the problem, the solution path, why each step should work, how it will be implemented, and how success will be judged.
 
 ## Blocking edges
 
@@ -73,8 +86,11 @@ They did, and that was a bug: a single shared file also raced when parallel agen
 **It kept truncating when it tried to read my spec.**
 A very large spec can outgrow what a tracker issue serves back cleanly, and there is no local copy to fall back on, so the agent then burns [tool calls](https://www.aihero.dev/ai-coding-dictionary/tool-call) re-fetching chunks and never reaches the end. Don't [clear](https://www.aihero.dev/ai-coding-dictionary/clearing) or [compact](https://www.aihero.dev/ai-coding-dictionary/compaction) between `/to-spec` and `/to-tickets`. Run them in the same context window and the spec never has to be fetched back at all.
 
-**The acceptance criteria graded nothing: some passed before any work was done.**
-The template asks for criteria and says nothing about whether they can fail, so this happens. Three shapes recur: a criterion already true at the base commit, a criterion that can only be satisfied by work another ticket owns, and one that restates the request rather than deriving from the artifact. Vertical slicing prevents most of it (a slice that delivers behaviour which didn't exist before is red at the base commit by construction), but the check is worth doing by hand. For each criterion, name the observation that would show it false, and confirm it fails at the commit the implementer starts from.
+**The success metrics graded nothing: some passed before any work was done.**
+Three shapes recur: a metric already true at the base commit, one that can only be satisfied by work another ticket owns, and one that restates the request instead of proving the solution step effective. For each metric, name the observation that would show it false, confirm that observation exists at the starting commit, and connect the metric to one What step or explicit regression risk.
+
+**The Why is clear, but What and How still feel disconnected.**
+What is probably written as a feature list. Rewrite it as ordered solution steps. For each step, point back to one pain or cause in Why and name the observation that would prove the pain is gone. Then make How map each implementation detail to a named What step. If a What step can be deleted without leaving a Why pain unresolved, or a How detail supports no What step, the causal chain is still broken.
 
 **The tickets are published. How do I actually run them?**
 The skill stops at the artifact, and there is no auto-dispatch mode. Dispatch is manual: look at the board, count the tickets with no open blockers, and open that many agent sessions. One ticket per fresh context, cleared between them. Be aware that [implement](https://aihero.dev/skills-implement) does not reliably close or check off the ticket when it finishes, on GitHub or in local markdown, so the ticket's state is yours to update.
@@ -87,6 +103,11 @@ The skill stops at the artifact, and there is no auto-dispatch mode. Dispatch is
 - Nothing in a ticket body is a file path or a line number, except a snippet a prototype produced.
 - Each ticket reads like something a fresh session could finish without you in the room.
 - Prefactoring, where it found any, is at the front of the order rather than mixed into feature tickets.
+- Every ticket's Why, What, How, and success metrics form a causal chain that a reader can restate without the originating conversation.
+- Every ticket gives at least one concrete example of the user's pain.
+- Every What step names the Why pain it removes and the observation that proves it effective.
+- Every How detail enables a named What step.
+- Every success metric is owned by the ticket and can fail at the starting commit.
 
 ## Where it fits
 
